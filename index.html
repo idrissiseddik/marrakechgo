@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Marrakech Go — Transport Urbain & Négociation Directe</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        :root {
+            color-scheme: light;
+            accent-color: #c84b31;
+            --kech-ochre: #c84b31;
+            --kech-ochre-dark: #a33620;
+            --kech-ochre-soft: #fdf2ef;
+            --kech-emerald: #1b6b52;
+            --kech-emerald-soft: #eaf5f1;
+            --kech-gold: #d9822b;
+            --kech-sand: #f7f4ef;
+            --kech-dark: #1f2421;
+            --kech-muted: #646e68;
+            --wa-green: #25D366;
+            --wa-green-dark: #1ebe5d;
+            --header-height: 70px;
+            --footer-height: 58px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--kech-sand);
+            color: var(--kech-dark);
+            padding-top: calc(var(--header-height) + 16px);
+            padding-bottom: calc(var(--footer-height) + 28px);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: radial-gradient(#e6dfd5 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .app-header {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: var(--header-height);
+            background: linear-gradient(135deg, var(--kech-ochre) 0%, #b53d24 100%);
+            color: #fff; z-index: 1030;
+            box-shadow: 0 4px 20px rgba(200, 75, 49, 0.28);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
+        .brand-icon {
+            width: 42px; height: 42px; border-radius: 14px;
+            background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .brand-title { font-family: 'Cairo', sans-serif; font-weight: 800; font-size: 1.3rem; line-height: 1.1; letter-spacing: -0.3px; }
+        .brand-subtitle { font-size: 0.72rem; opacity: 0.9; font-weight: 500; }
+        .live-pill {
+            background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 999px; padding: 5px 12px; font-size: 0.78rem; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background-color: #4ade80;
+            box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); animation: pulseGreen 1.8s infinite;
+        }
+        @keyframes pulseGreen {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(74, 222, 128, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        .mode-switcher {
+            background: #fff; border-radius: 18px; padding: 6px;
+            box-shadow: 0 6px 22px rgba(31, 36, 33, 0.06); border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .mode-btn {
+            border-radius: 14px; font-weight: 700; font-size: 0.9rem; padding: 10px 14px;
+            border: none; transition: all 0.25s ease; color: var(--kech-muted); background: transparent;
+        }
+        .mode-btn.active { background: var(--kech-ochre); color: #fff; box-shadow: 0 4px 12px rgba(200, 75, 49, 0.3); }
+        .mode-btn.active-driver { background: var(--kech-emerald); color: #fff; box-shadow: 0 4px 12px rgba(27, 107, 82, 0.3); }
+
+        .kech-card {
+            background: #fff; border-radius: 22px; border: 1px solid rgba(31, 36, 33, 0.06);
+            box-shadow: 0 10px 30px rgba(31, 36, 33, 0.05); overflow: hidden;
+        }
+        .kech-card-header {
+            background: linear-gradient(to right, var(--kech-ochre-soft), #fff);
+            padding: 18px 20px; border-bottom: 1px solid rgba(200, 75, 49, 0.1);
+        }
+        .form-label-kech {
+            font-weight: 700; font-size: 0.84rem; color: var(--kech-dark); margin-bottom: 6px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .darija-tag {
+            font-size: 0.72rem; font-weight: 700; color: var(--kech-ochre);
+            background: var(--kech-ochre-soft); padding: 2px 8px; border-radius: 8px;
+        }
+        .form-control, .form-select {
+            border-radius: 14px; border: 1.5px solid #e2ddd5; padding: 11px 14px;
+            font-size: 0.95rem; font-weight: 500; background-color: #fcfbf9; transition: all 0.2s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--kech-ochre); background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(200, 75, 49, 0.12);
+        }
+
+        input[type="time"] {
+            color-scheme: light !important; accent-color: #c84b31 !important;
+            color: #1e293b !important; background-color: #f8fafc !important;
+            border: 1.5px solid #cbd5e1 !important; font-weight: 700 !important; min-height: 44px;
+        }
+        input[type="time"]:focus { color: #0f172a !important; background-color: #fff !important; border-color: var(--kech-ochre) !important; }
+        input[type="time"]::-webkit-datetime-edit,
+        input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+        input[type="time"]::-webkit-datetime-edit-hour-field,
+        input[type="time"]::-webkit-datetime-edit-minute-field,
+        input[type="time"]::-webkit-datetime-edit-text { color: #1e293b !important; background-color: transparent; }
+        input[type="time"]::-webkit-datetime-edit-hour-field:focus,
+        input[type="time"]::-webkit-datetime-edit-minute-field:focus {
+            background-color: var(--kech-ochre-soft) !important; color: var(--kech-ochre-dark) !important; border-radius: 4px;
+        }
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(20%) sepia(15%) saturate(800%) hue-rotate(175deg) brightness(92%) contrast(95%);
+            opacity: 0.95; cursor: pointer; padding: 4px; border-radius: 6px;
+        }
+        .input-group-text {
+            border-radius: 14px; border: 1.5px solid #e2ddd5; background-color: #f4efe8;
+            color: var(--kech-ochre); font-weight: 700;
+        }
+
+        .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        @media (min-width: 576px) { .vehicle-grid { grid-template-columns: repeat(4, 1fr); } }
+        .vehicle-option input[type="radio"] { display: none; }
+        .vehicle-label {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 12px 8px; border-radius: 16px; border: 2px solid #ebe6de;
+            background: #fcfbf9; cursor: pointer; transition: all 0.2s ease; height: 100%;
+        }
+        .vehicle-label i { font-size: 1.35rem; margin-bottom: 6px; color: var(--kech-muted); transition: transform 0.2s ease; }
+        .vehicle-label span { font-size: 0.8rem; font-weight: 700; line-height: 1.2; }
+        .vehicle-option input[type="radio"]:checked + .vehicle-label {
+            border-color: var(--kech-ochre); background: var(--kech-ochre-soft);
+            color: var(--kech-ochre-dark); box-shadow: 0 4px 12px rgba(200, 75, 49, 0.14);
+        }
+        .vehicle-option input[type="radio"]:checked + .vehicle-label i { color: var(--kech-ochre); transform: scale(1.12); }
+
+        .price-box {
+            background: linear-gradient(135deg, var(--kech-emerald-soft) 0%, #f5fbf8 100%);
+            border: 1.5px dashed var(--kech-emerald); border-radius: 18px; padding: 14px;
+        }
+        .price-step-btn {
+            width: 44px; height: 44px; border-radius: 14px; border: none; background: #fff;
+            color: var(--kech-emerald); font-weight: 800; font-size: 1.1rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06); transition: all 0.15s ease;
+        }
+        .price-step-btn:active { transform: scale(0.92); }
+        .price-input {
+            font-size: 1.45rem !important; font-weight: 800 !important; text-align: center;
+            color: var(--kech-emerald) !important; border-color: rgba(27, 107, 82, 0.3) !important; background: #fff !important;
+        }
+        .btn-submit-kech {
+            background: linear-gradient(135deg, var(--kech-ochre) 0%, var(--kech-ochre-dark) 100%);
+            color: #fff; border: none; border-radius: 16px; padding: 14px 20px;
+            font-weight: 800; font-size: 1rem; letter-spacing: 0.2px;
+            box-shadow: 0 8px 20px rgba(200, 75, 49, 0.3); transition: all 0.2s ease;
+        }
+        .btn-submit-kech:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(200, 75, 49, 0.38); }
+        .btn-submit-kech:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .ride-card {
+            background: #fff; border-radius: 20px; border: 1px solid rgba(31, 36, 33, 0.07);
+            box-shadow: 0 8px 24px rgba(31, 36, 33, 0.045); padding: 18px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: slideUpFade 0.35s ease forwards; position: relative;
+        }
+        .ride-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(31, 36, 33, 0.08); }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+        .price-badge-card {
+            background: var(--kech-emerald); color: #fff; font-weight: 800; font-size: 1.15rem;
+            padding: 6px 14px; border-radius: 14px; box-shadow: 0 4px 12px rgba(27, 107, 82, 0.24); white-space: nowrap;
+        }
+        .route-timeline { position: relative; padding-left: 26px; margin: 14px 0; }
+        .route-timeline::before {
+            content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px;
+            background: repeating-linear-gradient(to bottom, var(--kech-ochre) 0, var(--kech-ochre) 4px, transparent 4px, transparent 8px);
+        }
+        .route-point { position: relative; }
+        .route-dot-start {
+            position: absolute; left: -24px; top: 4px; width: 14px; height: 14px;
+            border-radius: 50%; background: #fff; border: 4px solid var(--kech-ochre);
+        }
+        .route-dot-end {
+            position: absolute; left: -24px; top: 4px; width: 14px; height: 14px;
+            border-radius: 4px; background: var(--kech-emerald);
+        }
+        .time-window-pill {
+            background: #fff8eb; color: #9a5b13; border: 1px solid #f5deb3; border-radius: 12px;
+            padding: 7px 12px; font-size: 0.83rem; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .vehicle-badge {
+            background: #f2f4f3; color: var(--kech-dark); border-radius: 10px;
+            padding: 5px 10px; font-size: 0.78rem; font-weight: 700;
+        }
+        .btn-whatsapp {
+            background: linear-gradient(135deg, var(--wa-green) 0%, var(--wa-green-dark) 100%);
+            color: #fff; border: none; border-radius: 14px; font-weight: 700; font-size: 0.9rem;
+            padding: 11px 14px; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.28); transition: all 0.2s ease;
+        }
+        .btn-whatsapp:hover { color: #fff; transform: translateY(-1px); box-shadow: 0 7px 18px rgba(37, 211, 102, 0.36); }
+        .btn-counter {
+            background: var(--kech-ochre-soft); color: var(--kech-ochre-dark);
+            border: 1px solid rgba(200, 75, 49, 0.22); border-radius: 14px;
+            font-weight: 700; font-size: 0.86rem; padding: 10px 12px; transition: all 0.2s ease;
+        }
+        .btn-counter:hover { background: var(--kech-ochre); color: #fff; }
+
+        .ride-thumb {
+            width: 100%; max-height: 160px; object-fit: cover; border-radius: 12px;
+            border: 1px solid #e2ddd5; margin-top: 12px;
+        }
+
+        .app-footer {
+            position: fixed; bottom: 0; left: 0; right: 0; height: var(--footer-height);
+            background: rgba(31, 36, 33, 0.96); backdrop-filter: blur(8px); color: #f3f4f6;
+            z-index: 1030; display: flex; align-items: center; justify-content: center;
+            border-top: 2px solid var(--kech-ochre); box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.14); padding: 0 12px;
+        }
+        .footer-credit { font-size: 0.83rem; font-weight: 600; text-align: center; letter-spacing: 0.2px; }
+        .footer-author { color: #ffb088; font-weight: 800; }
+
+        @media (min-width: 992px) {
+            .mobile-only-tabs { display: none !important; }
+            .tab-pane-custom { display: block !important; }
+        }
+
+        .cloud-status {
+            font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .cloud-status.online { background: #d1fae5; color: #065f46; }
+        .cloud-status.offline { background: #fee2e2; color: #991b1b; }
+
+        .empty-state {
+            background: #fff; border-radius: 20px; padding: 40px 20px; text-align: center;
+            border: 1px dashed #d6cfc5;
+        }
+        .empty-state i { color: #c9beb0; }
+    </style>
+</head>
+<body>
+
+    <header class="app-header d-flex align-items-center">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="#" class="brand-logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+                <div class="brand-icon"><i class="fa-solid fa-mosque"></i></div>
+                <div>
+                    <div class="brand-title">Marrakech Go</div>
+                    <div class="brand-subtitle">Tanaqol & Négociation Directe</div>
+                </div>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <span id="cloudStatus" class="cloud-status offline" title="État de la connexion cloud">
+                    <i class="fa-solid fa-cloud"></i> <span id="cloudStatusText">Local</span>
+                </span>
+                <div class="live-pill" title="Demandes actives à Marrakech">
+                    <span class="pulse-dot"></span>
+                    <span id="activeCountBadge">0</span>
+                    <span class="d-none d-sm-inline">Trajets</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-light rounded-pill fw-bold px-3 text-dark" id="refreshBtn" title="Recharger depuis le cloud">
+                    <i class="fa-solid fa-cloud-arrow-down text-success" id="refreshIcon"></i>
+                    <span class="d-none d-md-inline ms-1">Rafraîchir</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="mode-switcher d-grid gap-2 mb-3 mobile-only-tabs" style="display: grid; grid-template-columns: 1fr 1fr;">
+            <button type="button" class="mode-btn active" id="tabPassengerBtn" onclick="switchMobileView('passenger')">
+                <i class="fa-solid fa-hand-holding-dollar me-1"></i> Demander (Passager)
+            </button>
+            <button type="button" class="mode-btn" id="tabDriverBtn" onclick="switchMobileView('driver')">
+                <i class="fa-solid fa-taxi me-1"></i> Offres (<span id="tabDriverCount">0</span>)
+            </button>
+        </div>
+
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-5 tab-pane-custom" id="passengerSection">
+                <div class="kech-card">
+                    <div class="kech-card-header d-flex align-items-center justify-content-between">
+                        <div>
+                            <h1 class="h5 fw-bold mb-0 text-dark"><i class="fa-solid fa-route text-danger me-2"></i>Tleb Transport f Kech</h1>
+                            <small class="text-muted">Proposez votre prix et négociez sur WhatsApp</small>
+                        </div>
+                    </div>
+
+                    <div class="p-3 p-sm-4">
+                        <form id="rideRequestForm" novalidate>
+                            <div class="row g-2 mb-3">
+                                <div class="col-12 col-sm-6">
+                                    <label for="passengerName" class="form-label-kech"><span><i class="fa-solid fa-user text-muted me-1"></i> Votre Nom</span></label>
+                                    <input type="text" class="form-control" id="passengerName" placeholder="Ex: Youssef" required>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label for="passengerPhone" class="form-label-kech"><span><i class="fa-brands fa-whatsapp text-success me-1"></i> N° WhatsApp</span></label>
+                                    <input type="tel" class="form-control" id="passengerPhone" placeholder="Ex: 0661234567" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="pickupSelect" class="form-label-kech">
+                                    <span><i class="fa-solid fa-circle-dot text-danger me-1"></i> Point de départ</span>
+                                    <span class="darija-tag">Min (منين)</span>
+                                </label>
+                                <div class="input-group">
+                                    <select class="form-select" id="pickupSelect" required>
+                                        <option value="" selected disabled>Choisir un point de départ...</option>
+                                        <option value="Guéliz (Plaza / Carré Eden)">Guéliz (Plaza / Carré Eden)</option>
+                                        <option value="Jamaa El Fna / Médina">Jamaa El Fna / Médina</option>
+                                        <option value="Gare ONCF Marrakech">Gare ONCF Marrakech</option>
+                                        <option value="Aéroport Marrakech-Ménara">Aéroport Marrakech-Ménara</option>
+                                        <option value="Hivernage">Hivernage</option>
+                                        <option value="M'hamid">M'hamid</option>
+                                        <option value="Sidi Youssef Ben Ali (SYBA)">Sidi Youssef Ben Ali (SYBA)</option>
+                                        <option value="Daoudiate">Daoudiate</option>
+                                        <option value="Massira 1 / 2 / 3">Massira 1 / 2 / 3</option>
+                                        <option value="Targa">Targa</option>
+                                        <option value="Palmeraie">Palmeraie</option>
+                                        <option value="Bab Doukkala">Bab Doukkala</option>
+                                        <option value="Sidi Ghanem">Sidi Ghanem</option>
+                                        <option value="Izdihar / Semlalia">Izdihar / Semlalia</option>
+                                        <option value="Menara Mall">Menara Mall</option>
+                                        <option value="Tamansourt">Tamansourt</option>
+                                        <option value="AUTRE" class="fw-bold text-danger">➕ Autre (Saisir un lieu...)</option>
+                                    </select>
+                                    <button class="btn btn-outline-secondary" type="button" id="swapLocationsBtn" title="Inverser Départ / Destination" style="border-radius: 0 14px 14px 0; border-color: #e2ddd5;">
+                                        <i class="fa-solid fa-arrows-up-down"></i>
+                                    </button>
+                                </div>
+                                <div id="pickupCustomWrapper" class="mt-2 d-none">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-pen-to-square text-danger"></i></span>
+                                        <input type="text" class="form-control" id="pickupCustomInput" placeholder="Saisir le quartier ou l'adresse de départ...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="dropoffSelect" class="form-label-kech">
+                                    <span><i class="fa-solid fa-location-dot text-success me-1"></i> Destination</span>
+                                    <span class="darija-tag">Ila (لفين)</span>
+                                </label>
+                                <select class="form-select" id="dropoffSelect" required>
+                                    <option value="" selected disabled>Choisir une destination...</option>
+                                    <option value="Guéliz (Plaza / Carré Eden)">Guéliz (Plaza / Carré Eden)</option>
+                                    <option value="Jamaa El Fna / Médina">Jamaa El Fna / Médina</option>
+                                    <option value="Gare ONCF Marrakech">Gare ONCF Marrakech</option>
+                                    <option value="Aéroport Marrakech-Ménara">Aéroport Marrakech-Ménara</option>
+                                    <option value="Hivernage">Hivernage</option>
+                                    <option value="M'hamid">M'hamid</option>
+                                    <option value="Sidi Youssef Ben Ali (SYBA)">Sidi Youssef Ben Ali (SYBA)</option>
+                                    <option value="Daoudiate">Daoudiate</option>
+                                    <option value="Massira 1 / 2 / 3">Massira 1 / 2 / 3</option>
+                                    <option value="Targa">Targa</option>
+                                    <option value="Palmeraie">Palmeraie</option>
+                                    <option value="Bab Doukkala">Bab Doukkala</option>
+                                    <option value="Sidi Ghanem">Sidi Ghanem</option>
+                                    <option value="Izdihar / Semlalia">Izdihar / Semlalia</option>
+                                    <option value="Menara Mall">Menara Mall</option>
+                                    <option value="Tamansourt">Tamansourt</option>
+                                    <option value="AUTRE" class="fw-bold text-success">➕ Autre (Saisir un lieu...)</option>
+                                </select>
+                                <div id="dropoffCustomWrapper" class="mt-2 d-none">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-pen-to-square text-success"></i></span>
+                                        <input type="text" class="form-control" id="dropoffCustomInput" placeholder="Saisir le quartier ou l'adresse de destination...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-label-kech">
+                                    <span><i class="fa-regular fa-clock text-warning me-1"></i> Créneau horaire</span>
+                                    <div>
+                                        <span class="darija-tag me-1">Bin / O</span>
+                                        <button type="button" class="btn btn-xs btn-outline-dark py-0 px-2 rounded-pill" id="nowTimeBtn" style="font-size: 0.72rem; font-weight: 700;">Daba (Maintenant)</button>
+                                    </div>
+                                </div>
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text py-1 px-2" style="font-size: 0.78rem;">Entre</span>
+                                            <input type="time" class="form-control" id="timeFrom" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text py-1 px-2" style="font-size: 0.78rem;">Et</span>
+                                            <input type="time" class="form-control" id="timeTo" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-kech">
+                                    <span><i class="fa-solid fa-car-side text-muted me-1"></i> Type de transport</span>
+                                    <span class="darija-tag">Chno bghiti?</span>
+                                </label>
+                                <div class="vehicle-grid">
+                                    <div class="vehicle-option">
+                                        <input type="radio" name="vehicleType" id="vPetitTaxi" value="Petit Taxi" checked>
+                                        <label class="vehicle-label" for="vPetitTaxi"><i class="fa-solid fa-taxi"></i><span>Petit Taxi</span></label>
+                                    </div>
+                                    <div class="vehicle-option">
+                                        <input type="radio" name="vehicleType" id="vGrandTaxi" value="Grand Taxi">
+                                        <label class="vehicle-label" for="vGrandTaxi"><i class="fa-solid fa-van-shuttle"></i><span>Grand Taxi</span></label>
+                                    </div>
+                                    <div class="vehicle-option">
+                                        <input type="radio" name="vehicleType" id="vPrive" value="Voiture Privée">
+                                        <label class="vehicle-label" for="vPrive"><i class="fa-solid fa-car"></i><span>Voiture Privée</span></label>
+                                    </div>
+                                    <div class="vehicle-option">
+                                        <input type="radio" name="vehicleType" id="vMoto" value="Moto / Triporteur">
+                                        <label class="vehicle-label" for="vMoto"><i class="fa-solid fa-motorcycle"></i><span>Moto / Triporteur</span></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 price-box">
+                                <label for="proposedPrice" class="form-label-kech mb-2">
+                                    <span><i class="fa-solid fa-coins text-success me-1"></i> Votre Prix Proposé</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Négociable en DH</span>
+                                </label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="price-step-btn" id="decreasePriceBtn" aria-label="Diminuer de 5 DH">-5</button>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control price-input" id="proposedPrice" value="25" min="5" max="2000" step="1" required>
+                                        <span class="input-group-text bg-white text-success fw-bold">DH</span>
+                                    </div>
+                                    <button type="button" class="price-step-btn" id="increasePriceBtn" aria-label="Augmenter de 5 DH">+5</button>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="rideImage" class="form-label-kech">
+                                    <span><i class="fa-solid fa-camera text-primary me-1"></i> Photo (optionnelle)</span>
+                                    <span class="darija-tag">Tswira</span>
+                                </label>
+                                <input type="file" class="form-control" id="rideImage" accept="image/*" capture="environment">
+                                <small class="text-muted" style="font-size: 0.72rem;">Ex: photo du lieu de rendez-vous, bagages, etc.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <input type="text" class="form-control form-control-sm" id="rideNotes" placeholder="Note optionnelle (Ex: 2 valises, 3 personnes, climatisation...)">
+                            </div>
+
+                            <button type="submit" class="btn btn-submit-kech w-100 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span id="submitBtnText">Publier ma demande (Ncher Talab)</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7 tab-pane-custom d-none d-lg-block" id="driverSection">
+                <div class="kech-card p-3 mb-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <div>
+                            <h2 class="h5 fw-bold mb-0"><i class="fa-solid fa-bolt text-warning me-1"></i> Demandes en direct (Espace Chauffeurs)</h2>
+                            <small class="text-muted">Cliquez sur WhatsApp pour accepter ou négocier le tarif</small>
+                        </div>
+                        <span class="badge bg-dark rounded-pill px-3 py-2" id="filteredCountText">0 demandes</span>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-7">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="searchFilterInput" placeholder="Filtrer par quartier (Guéliz, M'hamid...)">
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-5">
+                            <select class="form-select" id="vehicleFilterSelect">
+                                <option value="ALL">Tous les véhicules</option>
+                                <option value="Petit Taxi">Petit Taxi</option>
+                                <option value="Grand Taxi">Grand Taxi</option>
+                                <option value="Voiture Privée">Voiture Privée</option>
+                                <option value="Moto / Triporteur">Moto / Triporteur</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ridesFeedContainer" class="d-flex flex-column gap-3">
+                    <!-- Injecté par JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="footer-credit">
+            <i class="fa-solid fa-code me-1 text-warning"></i>
+            Marrakech Go &copy; 2026 — Développé avec passion par <span class="footer-author">M.Seddik Elidrissi</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // =========================================================================
+        // ⚙️ CONFIGURATION — REMPLACEZ L'URL CI-DESSOUS PAR CELLE DE VOTRE WEB APP
+        // =========================================================================
+        const CONFIG = {
+            // 👇 COLLEZ ICI L'URL DE VOTRE APPLICATION WEB APPS SCRIPT
+            // Format: https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+            WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzsPgKhOz_uZj1ygt92nYbuI7TBaOxJiQOmrlUTdiiNBAn2UYq0bVuDIzVxhqgzIZqp/exec',
+
+            USE_CLOUD: true,
+            REQUEST_TIMEOUT: 20000
+        };
+
+        // =========================================================================
+        // 1. STATE
+        // =========================================================================
+        const STORAGE_KEY = 'marrakech_go_rides_v2';
+
+        let rides = [];
+        let isCloudOnline = false;
+        let hasLoadedOnce = false;
+
+        // =========================================================================
+        // 2. INITIALISATION
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            setDefaultTimes();
+            setupEventListeners();
+            renderRides();
+
+            if (CONFIG.USE_CLOUD && isWebAppUrlValid()) {
+                await loadRidesFromCloud();
+            } else {
+                updateCloudStatus(false, 'Local');
+            }
+        });
+
+        function isWebAppUrlValid() {
+            return CONFIG.WEB_APP_URL &&
+                   !CONFIG.WEB_APP_URL.includes('VOTRE_ID_DE_DEPLOIEMENT') &&
+                   CONFIG.WEB_APP_URL.startsWith('https://');
+        }
+
+        function setDefaultTimes() {
+            const now = new Date();
+            const plus30 = new Date(now.getTime() + 30 * 60000);
+            const fmt = (d) => `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('timeFrom').value = fmt(now);
+            document.getElementById('timeTo').value = fmt(plus30);
+        }
+
+        function formatMoroccanWhatsAppNumber(rawPhone) {
+            let cleaned = String(rawPhone || '').replace(/[^\d+]/g, '');
+            if (cleaned.startsWith('+')) cleaned = cleaned.substring(1);
+            if (cleaned.startsWith('00212')) cleaned = cleaned.substring(2);
+            else if (cleaned.startsWith('0') && cleaned.length === 10) cleaned = '212' + cleaned.substring(1);
+            return cleaned;
+        }
+
+        function getTimeAgo(timestamp) {
+            const diffMins = Math.max(1, Math.floor((Date.now() - timestamp) / 60000));
+            if (diffMins < 60) return `Il y a ${diffMins} min`;
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `Il y a ${diffHours} h`;
+            return `Aujourd'hui`;
+        }
+
+        function getVehicleIcon(vehicle) {
+            switch (vehicle) {
+                case 'Petit Taxi': return 'fa-taxi text-danger';
+                case 'Grand Taxi': return 'fa-van-shuttle text-primary';
+                case 'Voiture Privée': return 'fa-car text-success';
+                case 'Moto / Triporteur': return 'fa-motorcycle text-warning';
+                default: return 'fa-car';
+            }
+        }
+
+        function updateCloudStatus(online, label) {
+            isCloudOnline = online;
+            const el = document.getElementById('cloudStatus');
+            const txt = document.getElementById('cloudStatusText');
+            el.classList.toggle('online', online);
+            el.classList.toggle('offline', !online);
+            txt.textContent = label || (online ? 'Cloud' : 'Local');
+            el.title = online ? 'Connecté à Google Sheets' : 'Mode local (hors ligne)';
+        }
+
+        // =========================================================================
+        // 3. COMMUNICATION AVEC GOOGLE APPS SCRIPT
+        // =========================================================================
+        async function fetchWithTimeout(url, options = {}, timeout = CONFIG.REQUEST_TIMEOUT) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(url, { ...options, signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (e) {
+                clearTimeout(id);
+                throw e;
+            }
+        }
+
+        async function loadRidesFromCloud() {
+            if (!isWebAppUrlValid()) {
+                updateCloudStatus(false, 'Non configuré');
+                return;
+            }
+
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+            try {
+                const response = await fetchWithTimeout(CONFIG.WEB_APP_URL, { method: 'GET' });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const data = await response.json();
+
+                if (!Array.isArray(data)) throw new Error('Format de réponse invalide');
+
+                const cloudRides = data.map(row => {
+                    if (!Array.isArray(row) || row.length < 12) return null;
+                    const [id, ts, name, phone, pickup, dropoff, timeFrom, timeTo, vehicle, price, notes, imageUrl] = row;
+                    return {
+                        id: id || ('kech-' + Math.random().toString(36).slice(2, 10)),
+                        name: name || 'Anonyme',
+                        phone: phone || '',
+                        pickup: pickup || '',
+                        dropoff: dropoff || '',
+                        timeFrom: timeFrom || '',
+                        timeTo: timeTo || '',
+                        vehicle: vehicle || 'Petit Taxi',
+                        price: parseFloat(price) || 0,
+                        notes: notes || '',
+                        imageUrl: imageUrl || '',
+                        createdAt: ts ? new Date(ts).getTime() : Date.now()
+                    };
+                }).filter(Boolean);
+
+                cloudRides.sort((a, b) => b.createdAt - a.createdAt);
+
+                rides = cloudRides;
+                hasLoadedOnce = true;
+                saveRidesToStorage();
+                renderRides();
+                updateCloudStatus(true, 'Cloud');
+
+            } catch (error) {
+                console.warn('⚠️ Cloud indisponible:', error.message);
+                updateCloudStatus(false, 'Local');
+                loadRidesFromStorage();
+                renderRides();
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        async function submitRideToCloud(payload) {
+            const response = await fetchWithTimeout(CONFIG.WEB_APP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return await response.json();
+        }
+
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+            });
+        }
+
+        // =========================================================================
+        // 4. CACHE LOCAL
+        // =========================================================================
+        function loadRidesFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) rides = parsed;
+                }
+            } catch (e) {
+                console.error('Erreur lecture localStorage:', e);
+                rides = [];
+            }
+        }
+
+        function saveRidesToStorage() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(rides)); } catch (e) { console.error(e); }
+        }
+
+        // =========================================================================
+        // 5. ÉVÉNEMENTS DU FORMULAIRE
+        // =========================================================================
+        function toggleCustomLocationField(selectEl, wrapperEl, inputEl, shouldFocus = true) {
+            if (selectEl.value === 'AUTRE') {
+                wrapperEl.classList.remove('d-none');
+                inputEl.setAttribute('required', 'required');
+                if (shouldFocus) inputEl.focus();
+            } else {
+                wrapperEl.classList.add('d-none');
+                inputEl.removeAttribute('required');
+                inputEl.value = '';
+            }
+        }
+
+        function setupEventListeners() {
+            const pickupSelect = document.getElementById('pickupSelect');
+            const pickupCustomWrapper = document.getElementById('pickupCustomWrapper');
+            const pickupCustomInput = document.getElementById('pickupCustomInput');
+            const dropoffSelect = document.getElementById('dropoffSelect');
+            const dropoffCustomWrapper = document.getElementById('dropoffCustomWrapper');
+            const dropoffCustomInput = document.getElementById('dropoffCustomInput');
+
+            pickupSelect.addEventListener('change', () => toggleCustomLocationField(pickupSelect, pickupCustomWrapper, pickupCustomInput, true));
+            dropoffSelect.addEventListener('change', () => toggleCustomLocationField(dropoffSelect, dropoffCustomWrapper, dropoffCustomInput, true));
+
+            const priceInput = document.getElementById('proposedPrice');
+            document.getElementById('decreasePriceBtn').addEventListener('click', () => {
+                priceInput.value = Math.max(5, (parseInt(priceInput.value, 10) || 10) - 5);
+            });
+            document.getElementById('increasePriceBtn').addEventListener('click', () => {
+                priceInput.value = (parseInt(priceInput.value, 10) || 10) + 5;
+            });
+
+            document.getElementById('nowTimeBtn').addEventListener('click', () => {
+                setDefaultTimes();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Créneau réglé sur maintenant (+30 min)', showConfirmButton: false, timer: 1800 });
+            });
+
+            document.getElementById('swapLocationsBtn').addEventListener('click', () => {
+                const tmpSel = pickupSelect.value, tmpCustom = pickupCustomInput.value;
+                pickupSelect.value = dropoffSelect.value;
+                pickupCustomInput.value = dropoffCustomInput.value;
+                dropoffSelect.value = tmpSel;
+                dropoffCustomInput.value = tmpCustom;
+                toggleCustomLocationField(pickupSelect, pickupCustomWrapper, pickupCustomInput, false);
+                toggleCustomLocationField(dropoffSelect, dropoffCustomWrapper, dropoffCustomInput, false);
+            });
+
+            document.getElementById('rideRequestForm').addEventListener('submit', handleFormSubmit);
+            document.getElementById('searchFilterInput').addEventListener('input', renderRides);
+            document.getElementById('vehicleFilterSelect').addEventListener('change', renderRides);
+
+            document.getElementById('refreshBtn').addEventListener('click', async () => {
+                if (!isWebAppUrlValid()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'URL non configurée',
+                        text: 'Veuillez renseigner WEB_APP_URL dans le code pour activer la connexion cloud.',
+                        confirmButtonColor: '#c84b31'
+                    });
+                    return;
+                }
+                await loadRidesFromCloud();
+                if (isCloudOnline) {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Données rechargées depuis le cloud', showConfirmButton: false, timer: 1500 });
+                } else {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Cloud injoignable, données locales conservées', showConfirmButton: false, timer: 2000 });
+                }
+            });
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('passengerName').value.trim();
+            const phone = document.getElementById('passengerPhone').value.trim();
+            const pickupSelect = document.getElementById('pickupSelect');
+            const pickupCustomInput = document.getElementById('pickupCustomInput');
+            const pickup = pickupSelect.value === 'AUTRE' ? pickupCustomInput.value.trim() : pickupSelect.value.trim();
+            const dropoffSelect = document.getElementById('dropoffSelect');
+            const dropoffCustomInput = document.getElementById('dropoffCustomInput');
+            const dropoff = dropoffSelect.value === 'AUTRE' ? dropoffCustomInput.value.trim() : dropoffSelect.value.trim();
+            const timeFrom = document.getElementById('timeFrom').value;
+            const timeTo = document.getElementById('timeTo').value;
+            const vehicle = document.querySelector('input[name="vehicleType"]:checked').value;
+            const price = parseFloat(document.getElementById('proposedPrice').value);
+            const notes = document.getElementById('rideNotes').value.trim();
+            const imageFile = document.getElementById('rideImage').files[0];
+
+            if (pickupSelect.value === 'AUTRE' && !pickup) {
+                Swal.fire({ icon: 'warning', title: 'Lieu de départ manquant', text: '3afak kteb smiyat l-blassa (point de départ).', confirmButtonColor: '#c84b31' }).then(() => pickupCustomInput.focus());
+                return;
+            }
+            if (dropoffSelect.value === 'AUTRE' && !dropoff) {
+                Swal.fire({ icon: 'warning', title: 'Destination manquante', text: '3afak kteb smiyat l-blassa (destination).', confirmButtonColor: '#c84b31' }).then(() => dropoffCustomInput.focus());
+                return;
+            }
+            if (!name || !phone || !pickup || !dropoff || !timeFrom || !timeTo || isNaN(price) || price < 5) {
+                Swal.fire({ icon: 'warning', title: 'Informations manquantes', text: '3afak 3emmer kamel les champs (Nom, WhatsApp, Min, Ila, Heure et Prix >= 5 DH).', confirmButtonColor: '#c84b31' });
+                return;
+            }
+
+            if (!isWebAppUrlValid()) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Connexion cloud non configurée',
+                    text: 'Impossible de publier : WEB_APP_URL n\'est pas renseignée. Contactez l\'administrateur.',
+                    confirmButtonColor: '#c84b31'
+                });
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const originalText = submitBtnText.textContent;
+            submitBtn.disabled = true;
+            submitBtnText.textContent = 'Envoi en cours...';
+
+            try {
+                let imageData = null;
+                let imageName = null;
+
+                if (imageFile) {
+                    try {
+                        const b64 = await fileToBase64(imageFile);
+                        imageData = b64.split(',')[1];
+                        imageName = `ride_${Date.now()}_${imageFile.name.replace(/[^\w.\-]/g, '_')}`;
+                    } catch (imgErr) {
+                        console.warn('Image non lue:', imgErr);
+                    }
+                }
+
+                const payload = { name, phone, pickup, dropoff, timeFrom, timeTo, vehicle, price, notes, imageData, imageName };
+
+                const cloudResult = await submitRideToCloud(payload);
+                if (cloudResult.status !== 'success') throw new Error(cloudResult.message || 'Erreur cloud');
+
+                updateCloudStatus(true, 'Cloud');
+
+                const newRide = {
+                    id: cloudResult.id || ('kech-' + Date.now()),
+                    name, phone, pickup, dropoff, timeFrom, timeTo, vehicle, price, notes,
+                    imageUrl: cloudResult.imageUrl || '',
+                    createdAt: Date.now()
+                };
+                rides.unshift(newRide);
+                saveRidesToStorage();
+                renderRides();
+
+                pickupSelect.value = '';
+                pickupCustomInput.value = '';
+                pickupCustomInput.removeAttribute('required');
+                document.getElementById('pickupCustomWrapper').classList.add('d-none');
+                dropoffSelect.value = '';
+                dropoffCustomInput.value = '';
+                dropoffCustomInput.removeAttribute('required');
+                document.getElementById('dropoffCustomWrapper').classList.add('d-none');
+                document.getElementById('rideNotes').value = '';
+                document.getElementById('rideImage').value = '';
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Talab dialk t-ncher ! 🎉',
+                    html: `Votre trajet <b>${escapeHTML(pickup)}</b> <i class="fa-solid fa-arrow-right mx-1"></i> <b>${escapeHTML(dropoff)}</b> à <b>${price} DH</b> est enregistré sur le cloud.`,
+                    confirmButtonText: 'Voir les offres en direct',
+                    confirmButtonColor: '#1b6b52'
+                }).then(() => {
+                    if (window.innerWidth < 992) switchMobileView('driver');
+                });
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Échec de l\'enregistrement',
+                    text: 'La demande n\'a pas pu être sauvegardée sur le cloud. Vérifiez votre connexion et réessayez.',
+                    confirmButtonColor: '#c84b31'
+                });
+                updateCloudStatus(false, 'Local');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtnText.textContent = originalText;
+            }
+        }
+
+        // =========================================================================
+        // 6. RENDU DES DEMANDES
+        // =========================================================================
+        function renderRides() {
+            const container = document.getElementById('ridesFeedContainer');
+            const searchQuery = document.getElementById('searchFilterInput').value.trim().toLowerCase();
+            const vehicleFilter = document.getElementById('vehicleFilterSelect').value;
+
+            document.getElementById('activeCountBadge').textContent = rides.length;
+            document.getElementById('tabDriverCount').textContent = rides.length;
+
+            const filtered = rides.filter(ride => {
+                const matchesSearch = !searchQuery || ride.pickup.toLowerCase().includes(searchQuery) || ride.dropoff.toLowerCase().includes(searchQuery) || ride.name.toLowerCase().includes(searchQuery);
+                const matchesVehicle = vehicleFilter === 'ALL' || ride.vehicle === vehicleFilter;
+                return matchesSearch && matchesVehicle;
+            });
+
+            document.getElementById('filteredCountText').textContent = `${filtered.length} demande${filtered.length > 1 ? 's' : ''}`;
+
+            if (filtered.length === 0) {
+                const msg = hasLoadedOnce
+                    ? `Aucune demande active pour le moment.<br><span class="text-muted">Publiez la première demande de transport à Marrakech.</span>`
+                    : `En attente de connexion au cloud...<br><span class="text-muted">Cliquez sur "Rafraîchir" pour charger les données.</span>`;
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-road-barrier fa-3x mb-3"></i>
+                        <h3 class="h6 fw-bold">${hasLoadedOnce ? 'Aucune demande' : 'Aucune donnée'}</h3>
+                        <p class="small mb-0">${msg}</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(ride => {
+                const waNumber = formatMoroccanWhatsAppNumber(ride.phone);
+                const defaultMessage = `Salam ${ride.name}, ana chauffeur f Marrakech Go. Chft talab dialk men "${ride.pickup}" l "${ride.dropoff}" bin ${ride.timeFrom} o ${ride.timeTo} b ${ride.price} DH (${ride.vehicle}). Wach mtaf9?`;
+                const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(defaultMessage)}`;
+
+                return `
+                    <article class="ride-card">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="fw-bold fs-6 text-dark">${escapeHTML(ride.name)}</span>
+                                    <span class="vehicle-badge"><i class="fa-solid ${getVehicleIcon(ride.vehicle)} me-1"></i>${escapeHTML(ride.vehicle)}</span>
+                                </div>
+                                <small class="text-muted d-block mt-1"><i class="fa-regular fa-clock me-1"></i>${getTimeAgo(ride.createdAt)}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="price-badge-card">${ride.price} DH</div>
+                                <small class="text-muted" style="font-size: 0.7rem;">Prix proposé</small>
+                            </div>
+                        </div>
+
+                        <div class="route-timeline">
+                            <div class="route-point mb-2">
+                                <span class="route-dot-start"></span>
+                                <small class="text-uppercase text-muted fw-bold d-block" style="font-size: 0.68rem;">Min (Départ)</small>
+                                <span class="fw-bold text-dark">${escapeHTML(ride.pickup)}</span>
+                            </div>
+                            <div class="route-point">
+                                <span class="route-dot-end"></span>
+                                <small class="text-uppercase text-muted fw-bold d-block" style="font-size: 0.68rem;">Ila (Destination)</small>
+                                <span class="fw-bold text-dark">${escapeHTML(ride.dropoff)}</span>
+                            </div>
+                        </div>
+
+                        ${ride.imageUrl ? `<img src="${escapeHTML(ride.imageUrl)}" alt="Photo du trajet" class="ride-thumb" loading="lazy">` : ''}
+
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 mt-3">
+                            <div class="time-window-pill">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                                <span>Bin <strong>${escapeHTML(ride.timeFrom)}</strong> o <strong>${escapeHTML(ride.timeTo)}</strong></span>
+                            </div>
+                            ${ride.notes ? `<div class="small text-muted bg-light px-2 py-1 rounded-3 border"><i class="fa-solid fa-circle-info text-primary me-1"></i>${escapeHTML(ride.notes)}</div>` : ''}
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+                                <i class="fa-brands fa-whatsapp fs-5"></i><span>Accepter / WhatsApp</span>
+                            </a>
+                            <button type="button" class="btn btn-counter d-flex align-items-center justify-content-center gap-1" onclick="openCounterOffer('${ride.id}')">
+                                <i class="fa-solid fa-hand-holding-dollar"></i><span>Négocier prix</span>
+                            </button>
+                        </div>
+                    </article>`;
+            }).join('');
+        }
+
+        function openCounterOffer(rideId) {
+            const ride = rides.find(r => r.id === rideId);
+            if (!ride) return;
+            Swal.fire({
+                title: 'Négocier le tarif (Contre-offre)',
+                html: `
+                    <p class="small text-muted mb-2">Trajet : <b>${escapeHTML(ride.pickup)}</b> <i class="fa-solid fa-arrow-right"></i> <b>${escapeHTML(ride.dropoff)}</b><br>
+                    Prix initial du passager : <span class="badge bg-success">${ride.price} DH</span></p>
+                    <label for="swalCounterPrice" class="form-label fw-bold small">Votre proposition en DH :</label>
+                    <input type="number" id="swalCounterPrice" class="form-control text-center fw-bold fs-4" value="${ride.price + 5}" min="5" max="3000">`,
+                icon: 'info', showCancelButton: true,
+                confirmButtonColor: '#25D366', cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fa-brands fa-whatsapp me-1"></i> Envoyer sur WhatsApp',
+                cancelButtonText: 'Annuler',
+                preConfirm: () => {
+                    const val = parseFloat(document.getElementById('swalCounterPrice').value);
+                    if (isNaN(val) || val < 5) { Swal.showValidationMessage('Prix invalide (min 5 DH)'); return false; }
+                    return val;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const counterPrice = result.value;
+                    const waNumber = formatMoroccanWhatsAppNumber(ride.phone);
+                    const negoMessage = `Salam ${ride.name}, ana chauffeur f Marrakech Go. Chft talab dialk men "${ride.pickup}" l "${ride.dropoff}" (bin ${ride.timeFrom} o ${ride.timeTo}). N9der ndik b ${counterPrice} DH f blaset ${ride.price} DH. Wach mtaf9?`;
+                    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(negoMessage)}`, '_blank', 'noopener,noreferrer');
+                }
+            });
+        }
+
+        function switchMobileView(view) {
+            const passengerSec = document.getElementById('passengerSection');
+            const driverSec = document.getElementById('driverSection');
+            const tabPassengerBtn = document.getElementById('tabPassengerBtn');
+            const tabDriverBtn = document.getElementById('tabDriverBtn');
+            if (view === 'passenger') {
+                passengerSec.classList.remove('d-none');
+                driverSec.classList.add('d-none');
+                tabPassengerBtn.classList.add('active');
+                tabDriverBtn.classList.remove('active-driver');
+            } else {
+                passengerSec.classList.add('d-none');
+                driverSec.classList.remove('d-none');
+                tabPassengerBtn.classList.remove('active');
+                tabDriverBtn.classList.add('active-driver');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
